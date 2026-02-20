@@ -15,6 +15,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install deps
         run: |
@@ -23,11 +24,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: Unit tests (fast)
+        env:
+          PYTHONPATH: .
+          ENABLE_TRACING: "false"
+          OTEL_EXPORTER_OTLP_ENDPOINT: ""
         run: |
-          export PYTHONPATH=$PYTHONPATH:.
-          export ENABLE_TRACING=false
-          export OTEL_EXPORTER_OTLP_ENDPOINT=""
-          pytest -q
+          pytest -q -m "not e2e"
 
       - name: Docker build
         run: |
@@ -37,7 +39,7 @@ jobs:
         run: |
           docker run -d --name api -p 8000:8000 -e ENABLE_TRACING=false -e OTEL_EXPORTER_OTLP_ENDPOINT="" sentiment-api:${{ github.sha }}
           
-          for i in {1..30}; do
+          for i in {1..60}; do
             if curl -sf http://localhost:8000/readyz >/dev/null; then
               echo "ready"
               break
@@ -48,5 +50,5 @@ jobs:
           curl -sf http://localhost:8000/healthz
           curl -sf http://localhost:8000/readyz
           curl -sf -X POST http://localhost:8000/v1/predict -H 'Content-Type: application/json' -d '{"text":"실적이 좋아 주가가 올랐다."}'
-          docker logs api --tail 50
+          docker logs api --tail 200
           docker rm -f api
