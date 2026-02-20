@@ -41,6 +41,8 @@ spec:
               value: "http://tempo.observability.svc.cluster.local:4317"
             - name: MODEL_ID
               value: "snunlp/KR-FinBert-SC"
+            - name: MODEL_DIR
+              value: "/models/KR-FinBert-SC"
             - name: MODEL_VERSION
               valueFrom:
                 configMapKeyRef:
