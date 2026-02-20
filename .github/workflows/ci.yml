@@ -3,6 +3,8 @@ name: ci
 on:
   push:
     branches: [ "main", "master" ]
+    paths-ignore:
+      - 'k8s/overlays/prod/kustomization.yaml'
   pull_request:
 
 permissions:
