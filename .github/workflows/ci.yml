@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+
+jobs:
+  test-build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.4.1
+          pip install -r requirements.txt
+
+      - name: Unit tests (fast)
+        run: |
+          pytest -q
+
+      - name: Docker build
+        run: |
+          docker build -f docker/Dockerfile -t sentiment-api:${{ github.sha }} .
+
+      - name: Smoke test container
+        run: |
+          docker run -d --name api -p 8000:8000 sentiment-api:${{ github.sha }}
+          sleep 15
+          curl -sf http://localhost:8000/healthz
+          curl -sf http://localhost:8000/readyz
+          curl -sf -X POST http://localhost:8000/v1/predict -H 'Content-Type: application/json' -d '{"text":"실적이 좋아 주가가 올랐다."}'
+          docker logs api --tail 50
+          docker rm -f api

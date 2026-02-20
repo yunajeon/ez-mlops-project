@@ -1,0 +1,14 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# HuggingFace model cache
+models/
+
+# Docker
+*.tar
+
+# OS
+.DS_Store
