@@ -24,7 +24,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: api
-          image: ghcr.io/your-org/sentiment-api:CHANGE_ME
+          image: ghcr.io/yunajeon/ez-mlops-project/sentiment-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
