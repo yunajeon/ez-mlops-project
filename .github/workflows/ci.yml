@@ -25,6 +25,8 @@ jobs:
       - name: Unit tests (fast)
         run: |
           export PYTHONPATH=$PYTHONPATH:.
+          export ENABLE_TRACING=false
+          export OTEL_EXPORTER_OTLP_ENDPOINT=""
           pytest -q
 
       - name: Docker build
@@ -33,8 +35,16 @@ jobs:
 
       - name: Smoke test container
         run: |
-          docker run -d --name api -p 8000:8000 sentiment-api:${{ github.sha }}
-          sleep 15
+          docker run -d --name api -p 8000:8000 -e ENABLE_TRACING=false -e OTEL_EXPORTER_OTLP_ENDPOINT="" sentiment-api:${{ github.sha }}
+          
+          for i in {1..30}; do
+            if curl -sf http://localhost:8000/readyz >/dev/null; then
+              echo "ready"
+              break
+            fi
+            sleep 2
+          done
+
           curl -sf http://localhost:8000/healthz
           curl -sf http://localhost:8000/readyz
           curl -sf -X POST http://localhost:8000/v1/predict -H 'Content-Type: application/json' -d '{"text":"실적이 좋아 주가가 올랐다."}'
