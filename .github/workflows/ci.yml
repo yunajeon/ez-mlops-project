@@ -24,6 +24,7 @@ jobs:
 
       - name: Unit tests (fast)
         run: |
+          export PYTHONPATH=$PYTHONPATH:.
           pytest -q
 
       - name: Docker build
