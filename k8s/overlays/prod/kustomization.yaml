@@ -5,4 +5,4 @@ resources:
 namespace: sentiment
 images:
   - name: ghcr.io/yunajeon/ez-mlops-project/sentiment-api
-    newTag: prod-CHANGE_ME
+    newTag: prod-fd7d850
